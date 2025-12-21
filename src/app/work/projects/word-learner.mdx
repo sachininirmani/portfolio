@@ -1,0 +1,217 @@
+---
+title: "Sinhala–English Word Learner"
+summary: "A full-stack vocabulary learning web application with AI-powered usage generation, Word of the Day automation, and push notifications."
+
+images:
+  - "/images/projects/wordlearner/cover-01.png"
+  - "/images/projects/wordlearner/cover-02.png"
+
+link: "https://word-learner-nsxk.vercel.app/"
+---
+
+## Project Overview
+
+The **Sinhala–English Word Learner** is a full-stack web application I designed and built to help Sinhala-speaking users improve their English vocabulary in a structured, practical, and beginner-friendly way. The application focuses not only on definitions, but also on **real-world usage**, **daily learning habits**, and **resilience against API limitations**.
+
+The project was intentionally built using **free tiers**, modern web technologies, and real-world engineering practices such as caching, rate limiting, automation, and graceful fallbacks. The goal was to create a production-like system that continues to work even when external services fail.
+
+---
+
+## Live Project & Source Code
+
+- **Live Website**  
+  https://word-learner-nsxk.vercel.app/
+
+- **GitHub Repository**  
+  https://github.com/sachininirmani/wordLearner
+
+---
+
+## Motivation Behind the Project
+
+While many dictionary applications exist, most of them fail to address the needs of Sinhala learners who require:
+- Simple English explanations
+- Sinhala translations
+- Clear example sentences
+- Consistent daily learning prompts
+
+I wanted to build a system that feels **educational rather than overwhelming**, while still demonstrating real software engineering depth such as API orchestration, automation, and deployment workflows.
+
+---
+
+## Core Features
+
+### Word Search and Meaning Display
+
+Users can search for any English word and instantly receive:
+- English definition
+- Sinhala translation
+- Phonetic transcription
+- Pronunciation audio (when available)
+
+All results are displayed using clean, responsive cards designed for both desktop and mobile users.
+
+
+---
+
+### Usage Sentences (AI + Fallback Strategy)
+
+One of the key features of the application is **usage sentence generation**.
+
+When a user searches a word:
+- The system **first attempts to generate 3 natural English sentences using AI (Gemini)**.
+- These sentences are then translated into Sinhala.
+- If AI is unavailable (quota exceeded, missing key, network failure), the system **automatically falls back to a demo logic**.
+
+The fallback logic:
+- Detects whether the word is a **noun, verb, adjective, or adverb**
+- Generates grammatically correct template sentences
+- Clearly warns the user that AI limits were exceeded and demo mode is active
+
+This design ensures the user **always gets meaningful output**, regardless of AI availability.
+
+
+---
+
+### Word of the Day (WOTD)
+
+The application includes a **Word of the Day** feature to encourage daily learning.
+
+Each day:
+- A new word is generated automatically
+- Stored in a static JSON file
+- Displayed on a dedicated page
+
+Users can open the Word of the Day independently and review its meaning and usage.
+
+
+
+---
+
+## Automation with GitHub Actions
+
+To fully automate the Word of the Day feature, I implemented a **GitHub Actions workflow**.
+
+The workflow:
+- Runs daily at midnight (UTC)
+- Generates a new word
+- Updates the `wotd.json` file
+- Commits the change back to GitHub
+- Triggers a Vercel redeployment automatically
+
+This allows the Word of the Day to update **without any manual intervention**.
+
+I also added a manual trigger (`workflow_dispatch`) so I can run the workflow on demand.
+
+---
+
+## Push Notifications (Optional Feature)
+
+The project supports **Web Push Notifications** using:
+- Service Workers
+- VAPID key pairs
+- Secure subscription storage
+
+When enabled:
+- Users can subscribe to notifications
+- The daily Word of the Day can be pushed to their browser
+- Clicking the notification opens the Word of the Day page
+
+Push notifications are optional and only delivered to users who explicitly allow them.
+
+
+---
+
+## Deployment with Vercel
+
+The application is deployed using **Vercel**, which provides:
+- Free hosting for Next.js
+- Automatic builds from GitHub
+- HTTPS support (required for push notifications)
+- Secure environment variable management
+
+Each commit to the main branch triggers a fresh deployment, ensuring the live site always reflects the latest stable version.
+
+---
+
+## Environment Variables & Security
+
+Sensitive configuration is handled using environment variables, including:
+- AI API keys
+- Push notification VAPID keys
+- Shared secrets for GitHub Actions
+
+Public-facing values (such as the VAPID public key) are safely exposed using `NEXT_PUBLIC_` prefixes, while private keys remain server-only.
+
+This approach prevents credential leaks while maintaining full functionality.
+
+---
+
+## Rate Limiting, Caching, and Free Tier Protection
+
+Because the project relies on free-tier APIs, I implemented several safety mechanisms:
+- **Server-side rate limiting per IP**
+- **Client-side request caps**
+- **In-memory caching for repeated queries**
+- **Graceful fallback logic when limits are exceeded**
+
+These measures ensure:
+- The app does not abuse APIs
+- Costs remain controlled
+- Users still receive results even when limits are hit
+
+---
+
+## Challenges Faced
+
+### AI Quota Exhaustion
+I encountered frequent AI quota errors during testing. Instead of treating this as a failure, I redesigned the system to **expect AI failure** and continue operating normally using demo logic.
+
+### GitHub Actions Validation Errors
+Early workflow versions failed due to incorrect `secrets` usage in YAML conditions. I resolved this by moving validation logic into runtime shell scripts.
+
+### Push Notification Debugging
+Push notifications required careful coordination between:
+- Browser permissions
+- Service worker registration
+- HTTPS deployment
+- Subscription storage
+
+Debugging this taught me a lot about real-world browser security constraints.
+
+---
+
+## What I Learned from This Project
+
+This project helped me gain hands-on experience with:
+- Full-stack Next.js development
+- API orchestration and fallbacks
+- Free-tier aware system design
+- GitHub Actions automation
+- Secure secret handling
+- Web Push Notifications
+- Production-style deployment workflows
+
+Most importantly, I learned that **real applications must be designed for failure**, not just for ideal conditions.
+
+---
+
+## Future Improvements
+
+Possible future enhancements include:
+- User accounts and progress tracking
+- Offline mode with IndexedDB
+- Smarter example sentence generation
+- Expanded Sinhala language support
+- Analytics for learning patterns
+
+---
+
+## Conclusion
+
+The Sinhala–English Word Learner is more than a vocabulary app—it is a demonstration of how modern web applications can be built responsibly using free tools, automation, and robust engineering principles.
+
+It represents my ability to design, build, deploy, and maintain a real-world system from end to end.
+
+---
+
