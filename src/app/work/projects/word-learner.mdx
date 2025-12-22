@@ -121,6 +121,14 @@ Push notifications are optional and only delivered to users who explicitly allow
 
 
 ---
+### Push Notification Reliability & Serverless Persistence
+
+During later iterations of the project, the push notification system was refactored to ensure reliability in a serverless deployment environment. Initially, browser push subscriptions were stored in a local JSON file, which works in traditional servers but fails in serverless platforms due to ephemeral filesystems. To address this, the subscription storage layer was migrated to **Vercel KV (Upstash Redis)**, a persistent, serverless-compatible key–value database.
+
+With this change, each device’s push subscription is stored persistently using Redis, allowing scheduled jobs and API routes to access the same data across deployments, cold starts, and execution instances. A GitHub Actions workflow securely triggers the Word of the Day notification endpoint, which retrieves subscriptions from Vercel KV and sends notifications using the Web Push protocol with VAPID authentication. Invalid or expired subscriptions are automatically removed, ensuring long-term stability, correctness, and scalability while remaining fully within free-tier infrastructure.
+
+![Word of the Day Push Notification Architecture](/images/projects/wordlearner/ss.png)
+
 
 ## Deployment with Vercel
 
