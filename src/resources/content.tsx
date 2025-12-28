@@ -88,17 +88,27 @@ const about: About = {
     link: "https://cal.com",
   },
   intro: {
-    display: true,
-    title: "Introduction",
-    description: (
-      <>
-        I’m a Computer Science undergraduate with hands-on experience as a Software Engineer Intern,
-         where I worked on real-world systems, code quality improvements, and modern web technologies. 
-         I enjoy collaborating in teams, learning deeply,
-         and building software that is both practical and reliable.
-      </>
-    ),
-  },
+  display: true,
+  title: "Introduction",
+  description: (
+    <>
+      I’m a Computer Science undergraduate with hands-on experience as a Software Engineer Intern,
+      where I worked on real-world systems, code quality improvements, and modern web technologies. 
+      I enjoy collaborating in teams, learning deeply,
+      and building software that is both practical and reliable.
+      <br /><br />
+      <a
+        href="/cv/Nirmani_Umasha_SE.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: "underline", fontWeight: 500 }}
+      >
+        Click here to view my CV
+      </a>
+    </>
+  ),
+},
+
   work: {
     display: true, // set to false to hide this section
     title: "Work Experience",
