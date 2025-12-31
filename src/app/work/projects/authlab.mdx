@@ -1,0 +1,255 @@
+---
+title: "AuthLab – Authentication & Web Security Learning Sandbox"
+summary: "An interactive, full-stack educational platform that demonstrates how modern web authentication, authorization, and security mechanisms work through hands-on labs and visual simulations."
+
+images:
+  - "/images/projects/authlab/img_01.png"
+  - "/images/projects/authlab/img_02.png"
+
+link: "https://auth-lab-tau.vercel.app/"
+---
+
+## Project Overview
+
+**AuthLab** is a full-stack, web-based **authentication and security learning sandbox** designed to help learners understand how real-world web security works beyond theory.
+
+Instead of hiding security logic behind frameworks, AuthLab intentionally **exposes internal flows**, **browser behavior**, and **backend decisions** so learners can observe how authentication, cookies, tokens, and authorization are enforced in practice.
+
+The project was built as an **academic and portfolio project**, using only **free-tier services**, modern web technologies, and production-grade security practices—while remaining simple enough for beginners to understand.
+
+---
+
+## Live Project & Source Code
+
+- **Live Website**  
+  https://auth-lab-tau.vercel.app/
+
+- **GitHub Repository**  
+  https://github.com/sachininirmani/AuthLab
+
+---
+
+## Motivation and Problem Statement
+
+Web security concepts such as authentication, JWTs, cookies, and CSRF are often confusing for beginners because:
+
+- Authentication feels like “magic”
+- Cookies and tokens are invisible to users
+- Attacks are described theoretically but never observed
+- Frontend-only demos hide real backend enforcement
+
+AuthLab solves this problem by providing a **safe, interactive environment** where learners can:
+- Log in and out
+- Trigger protected APIs
+- Simulate attacks
+- See exactly **why security checks succeed or fail**
+
+---
+
+## System Architecture Overview
+
+![AuthLab Demonstrations](/images/projects/authlab/img_03.png)
+
+AuthLab follows a **modern client–server architecture**:
+
+### 1. Browser
+- Renders the frontend UI
+- Stores cookies automatically
+- Sends cookies with every request based on browser rules
+
+### 2. Frontend (Next.js)
+- Runs JavaScript in the user’s browser
+- Displays explanations, labs, and visualizations
+- Calls backend APIs using `fetch`
+
+### 3. Backend (Next.js APIs & Middleware)
+- Executes on the server
+- Reads cookies securely
+- Enforces authentication and authorization
+- Rejects unauthorized access
+
+### 4. Supabase Authentication
+- Validates user credentials
+- Hashes passwords securely
+- Issues signed session tokens
+- Manages secure authentication cookies
+
+### 5. Supabase Database (Optional)
+- Stores audit logs
+- Demonstrates backend logging and monitoring
+
+---
+
+## Technology Stack
+
+### Frontend
+- **Next.js (App Router)**
+- React
+- TypeScript
+- Custom lightweight CSS
+
+### Backend
+- Next.js Route Handlers (`/app/api/*`)
+- Next.js Middleware (Edge runtime)
+- Server-side authorization checks
+
+### Authentication & Security
+- **Supabase Auth**
+- JWT-based session validation
+- HttpOnly cookies
+- SameSite cookie protection
+
+### Hosting
+- **Vercel** (frontend + backend hosting)
+- **Supabase** (authentication & database)
+- Fully deployed using free tiers
+
+---
+
+## Authentication Flow Explained
+
+
+1. User enters email and password
+2. Browser sends credentials over **HTTPS**
+3. Supabase:
+   - Hashes the password
+   - Verifies credentials
+4. Supabase sets **HttpOnly authentication cookies**
+5. Browser stores cookies automatically
+6. On future requests:
+   - Browser sends cookies automatically
+7. Backend verifies session securely
+
+Important security guarantees:
+- Passwords are never stored in plaintext
+- Tokens are never accessible to JavaScript
+- All communication is encrypted using HTTPS
+
+---
+
+## Key Security Concepts Demonstrated
+
+### Cookies
+- HttpOnly cookies cannot be accessed via JavaScript
+- Secure cookies are sent only over HTTPS
+- SameSite cookies control cross-site behavior
+
+### JWT (JSON Web Tokens)
+- JWT structure: `header.payload.signature`
+- Payload is readable
+- Signature prevents tampering
+- JWT verification happens **on the server**
+
+### CSRF (Cross-Site Request Forgery)
+- Browsers send cookies automatically
+- Attackers exploit this behavior
+- SameSite cookies prevent cross-site abuse
+
+### Authorization (RBAC)
+- USER vs ADMIN roles
+- Backend enforces access control
+- Frontend bypass attempts always fail
+
+### Hashing vs Encryption
+- Passwords are **hashed** (one-way)
+- Network traffic is **encrypted** (two-way via TLS)
+- JWTs are **signed**, not encrypted
+
+---
+
+## Simulated Role-Based Access Control
+
+AuthLab includes a **simulated role system** for learning purposes.
+
+- Role stored in a secure HttpOnly cookie (`sim_role`)
+- Learners can switch between USER and ADMIN
+- Backend enforces role checks
+
+This design allows:
+- Role testing without multiple accounts
+- Clear visualization of authorization logic
+
+> ⚠️ Note: This is strictly for education. Real applications must store roles securely in databases or JWT claims.
+
+---
+
+## Middleware and Route Protection
+
+Next.js Middleware runs **before** requests reach pages or APIs.
+
+AuthLab uses middleware to:
+- Protect `/dashboard` and `/admin`
+- Redirect unauthenticated users
+- Demonstrate real server-side enforcement
+
+This ensures:
+- Security is not dependent on frontend logic
+- Unauthorized requests are blocked early
+
+---
+
+## Hosting and Deployment Strategy
+
+### Frontend & Backend Hosting
+- Hosted on **Vercel**
+- Automatic HTTPS
+- Continuous deployment via GitHub
+
+### Authentication & Database
+- Hosted on **Supabase**
+- Secure by default
+- Free tier sufficient for educational usage
+
+### Environment Configuration
+- Supabase URL
+- Supabase anonymous public key
+- Securely stored in Vercel environment variables
+
+---
+
+## Educational Value and Learning Outcomes
+
+After using AuthLab, learners gain a practical understanding of:
+- How login systems actually work
+- Why cookies matter for security
+- How CSRF attacks are blocked
+- Why JWT tampering fails
+- How backend authorization is enforced
+
+AuthLab bridges the gap between **theoretical security knowledge** and **real-world implementation**.
+
+---
+
+## Limitations and Future Improvements
+
+Planned enhancements include:
+- OAuth provider demonstrations
+- XSS attack simulations
+- Rate-limiting visualization
+- Security headers lab
+- Advanced audit analytics
+
+---
+
+## References and Resources
+
+- Next.js Documentation: https://nextjs.org/docs  
+- Supabase Auth: https://supabase.com/docs/guides/auth  
+- OWASP Top 10: https://owasp.org/www-project-top-ten/  
+- HTTP Cookies (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies  
+
+---
+
+## Conclusion
+
+AuthLab is more than a demo—it is a **hands-on security learning platform** that demonstrates how modern authentication and authorization systems work in practice.
+
+The project showcases my ability to:
+- Design secure architectures
+- Implement real authentication flows
+- Deploy production-ready applications
+- Explain complex security concepts clearly
+
+AuthLab represents a complete, end-to-end system built using modern tools, strong security principles, and free hosting infrastructure.
+
+---
