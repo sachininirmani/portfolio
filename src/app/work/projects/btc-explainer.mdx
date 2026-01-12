@@ -4,7 +4,6 @@ summary: "A full-stack analytics platform that detects significant BTC price mov
 images:
   - "/images/projects/btcexplainer/img_01.png"
   - "/images/projects/btcexplainer/img_02.png"
-  - "/images/projects/btcexplainer/img_03.png"
 
 link: "https://btc-explainer.vercel.app/"
 repo: "https://github.com/sachininirmani/BTC-explainer"
@@ -20,7 +19,7 @@ The project was built end-to-end with a real deployment setup:
 - Backend hosted on Render (Docker)
 - Database hosted on Neon (PostgreSQL)
 - Schema managed with Flyway migrations
-- Scheduled refresh using Render Cron + a secured admin endpoint
+- Scheduled refresh using Cron + a secured admin endpoint
 
 ---
 
@@ -58,7 +57,7 @@ This gives users a simple answer to: **“What likely caused this BTC move?”**
 - A secured admin endpoint triggers a full refresh:
   - `POST /api/admin/refresh`
   - Protected by `X-Admin-Token` (stored as an environment secret)
-- A cloud cron job triggers refresh automatically (Render Cron).
+- A  cron job triggers refresh automatically (Github Action).
 - Internal Spring scheduling can be disabled in production with a feature flag to avoid double-runs.
 
 ### API-First Backend
@@ -97,6 +96,7 @@ This project follows a clean “Frontend → Backend → Database” architectur
   - Protected admin endpoint for refresh
 
 ### DB (Neon PostgreSQL)
+![DB Demonstrations](/images/projects/btcexplainer/img_03.png)
 - Stores all persistent system data:
   - Market events
   - Price snapshots
@@ -155,18 +155,18 @@ This results in a reliable and repeatable pipeline:
 
 ---
 
-## Cron Job Strategy (Render Cron + Feature Flag)
+## Cron Job Strategy ( Github action + Feature Flag)
 
-### Why use Render Cron
-Using Render Cron keeps production scheduling outside the application container:
+### Why use Github action
+Using Cron keeps production scheduling outside the application container:
 - No dependency on a always-running process
 - Better aligned with free-tier “sleep” behavior
-- Easy to change schedule without redeploying code
+- Manual workflow trigger
 
 ### Avoiding double execution
 The backend includes a feature flag to disable internal scheduling in production:
 - `app.jobs.enabled=false` (production)
-- Render Cron calls the admin refresh endpoint instead
+-  Github action calls the admin refresh endpoint instead
 
 This prevents the same job from running twice.
 
@@ -265,7 +265,6 @@ This project demonstrates more than just “a working app”. It demonstrates pr
 - External signal ingestion and correlation for explanations
 - Version-controlled database schema with Flyway migrations
 - Secure admin operations with token-based protection
-- Robust scheduling strategy using cloud cron + feature flags
 - Optional OpenAI integration with safe fallback behavior
 - Production-safe secret handling (no keys in Git)
 - Real cloud deployment on a free-tier stack (Vercel + Render + Neon)
