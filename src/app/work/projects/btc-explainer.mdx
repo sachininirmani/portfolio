@@ -1,0 +1,286 @@
+---
+title: "BTC Explainer – Bitcoin Movement Explanation Platform"
+summary: "A full-stack analytics platform that detects significant BTC price movements, ingests supporting signals (news, sentiment, FX, weather), and generates clear explanations with optional OpenAI-powered narratives. Deployed with a free-tier cloud stack (Vercel + Render + Neon) and production-safe configuration."
+images:
+  - "/images/projects/btcexplainer/img_01.png"
+  - "/images/projects/btcexplainer/img_02.png"
+  - "/images/projects/btcexplainer/img_03.png"
+
+link: "https://btc-explainer.vercel.app/"
+repo: "https://github.com/sachininirmani/BTC-explainer"
+---
+
+## Project Overview
+
+**BTC Explainer** is a production-style, full-stack web application that helps users understand **why Bitcoin moved** during a specific period.  
+It connects **market data** with multiple external signals and produces a short, readable explanation for each detected movement.
+
+The project was built end-to-end with a real deployment setup:
+- Frontend hosted on Vercel
+- Backend hosted on Render (Docker)
+- Database hosted on Neon (PostgreSQL)
+- Schema managed with Flyway migrations
+- Scheduled refresh using Render Cron + a secured admin endpoint
+
+---
+
+## What the system does
+
+The platform runs a daily pipeline that:
+- Ingests BTC market data (daily OHLC and related metrics)
+- Detects unusually large moves (events)
+- Collects supporting signals from external sources (news + other indicators)
+- Stores everything in PostgreSQL
+- Generates (or regenerates) explanations for the newest events (best-effort)
+- Serves a dashboard where users can browse events and read explanations
+
+This gives users a simple answer to: **“What likely caused this BTC move?”**
+
+---
+
+## Key Features
+
+### Event Detection & Explanation
+- Detects major BTC movements and creates a “Market Event” record for each movement.
+- Generates a narrative explanation for each event.
+- Explanations support **two modes**:
+  - AI-assisted explanation using OpenAI (enabled via config)
+  - Safe fallback explanation when AI is disabled or unavailable
+
+### Signal Ingestion (Supporting Context)
+- Ingests multiple external signals to provide context for BTC movements:
+  - News signals (headlines / intensity / sources)
+  - Sentiment indicators
+  - FX rates (e.g., EUR/USD signals)
+  - Weather extremes (as a macro signal, when applicable)
+
+### Admin Refresh + Scheduling
+- A secured admin endpoint triggers a full refresh:
+  - `POST /api/admin/refresh`
+  - Protected by `X-Admin-Token` (stored as an environment secret)
+- A cloud cron job triggers refresh automatically (Render Cron).
+- Internal Spring scheduling can be disabled in production with a feature flag to avoid double-runs.
+
+### API-First Backend
+- Backend exposes REST endpoints used by the frontend.
+- Includes API testing workflows using:
+  - Swagger/OpenAPI (interactive docs)
+  - curl (automation-friendly testing)
+
+### Production-Safe Configuration
+- No secrets are committed into the repository.
+- Uses:
+  - `application-prod.yml` for safe defaults
+  - Environment variables on Render/Vercel for secrets and environment-specific values
+
+---
+
+## Architecture (FO / BO / DB)
+
+This project follows a clean “Frontend → Backend → Database” architecture:
+
+### FO (Frontend)
+- A browser-based UI (deployed on Vercel)
+- Reads configuration from `VITE_API_BASE_URL`
+- Calls backend REST endpoints to fetch:
+  - Event lists
+  - Event details
+  - Explanations and signal summaries
+
+### BO (Backend / Spring Boot)
+- Spring Boot API service (deployed on Render)
+- Responsibilities:
+  - Data ingestion orchestration
+  - Event detection logic
+  - Explanation generation (AI + fallback)
+  - Cache management for fast reads
+  - Protected admin endpoint for refresh
+
+### DB (Neon PostgreSQL)
+- Stores all persistent system data:
+  - Market events
+  - Price snapshots
+  - External signals (news, sentiment, FX, weather)
+  - Explanation records and metadata
+- Schema is version-controlled using Flyway migrations.
+
+---
+
+## Database & Migrations (PostgreSQL + Neon + Flyway)
+
+### PostgreSQL storage
+PostgreSQL is used as the single source of truth for:
+- Historical event data
+- Supporting signals
+- Generated explanations
+- Aggregated outputs shown in the UI
+
+### Neon
+Neon provides:
+- Managed PostgreSQL
+- Free-tier hosting suitable for portfolio projects
+- SSL support for secure connections
+
+### Flyway migrations
+Flyway ensures:
+- The database schema is created/updated through versioned SQL migrations.
+- Every environment (local and production) stays consistent.
+
+On startup, the backend:
+- Validates migrations
+- Applies missing migrations
+- Refuses to start if the schema is incompatible (safer than silent failures)
+
+---
+
+## CRUD & Data Access Patterns
+
+Even though BTC Explainer is not a classic “CRUD app”, it still implements solid CRUD-style data handling:
+
+- **Create**
+  - Events, prices, and signal records are created/updated during ingestion.
+  - Explanations are created during generation.
+- **Read**
+  - UI reads event lists and event detail views through REST APIs.
+  - Cached reads are used for “latest events” views.
+- **Update**
+  - Upserts are used for price/signal ingestion to keep data stable and idempotent.
+  - Explanations can be regenerated for the latest events.
+- **Delete / Retention**
+  - The pipeline supports retention by limiting “keep last N events” and evicting caches.
+
+This results in a reliable and repeatable pipeline:
+- It can run daily without duplicating or corrupting data.
+- It can be re-run manually via admin refresh if needed.
+
+---
+
+## Cron Job Strategy (Render Cron + Feature Flag)
+
+### Why use Render Cron
+Using Render Cron keeps production scheduling outside the application container:
+- No dependency on a always-running process
+- Better aligned with free-tier “sleep” behavior
+- Easy to change schedule without redeploying code
+
+### Avoiding double execution
+The backend includes a feature flag to disable internal scheduling in production:
+- `app.jobs.enabled=false` (production)
+- Render Cron calls the admin refresh endpoint instead
+
+This prevents the same job from running twice.
+
+---
+
+## Security & Secret Management
+
+### Secrets are never committed
+Secrets are stored only in platform configuration (Render/Vercel Environment):
+- Neon database credentials
+- Admin refresh token
+- OpenAI API key (optional)
+
+### Admin refresh protection
+The refresh endpoint is protected using an admin token:
+- Request must include `X-Admin-Token`
+- Token is validated server-side
+- Unauthorized calls return `401`
+
+This is important because the refresh action triggers:
+- Data ingestion
+- Detection
+- Explanation generation
+
+---
+
+## OpenAI Integration (Optional, Safe by Design)
+
+The explanation engine supports OpenAI as an optional enhancement:
+- Enabled/disabled using configuration (`OPENAI_ENABLED`)
+- Model configurable (example: `gpt-4o-mini`)
+- Best-effort behavior:
+  - If OpenAI fails, the system can fall back to deterministic explanations
+
+This makes the system robust:
+- It still works without AI
+- AI improves clarity when enabled
+
+---
+
+## API Documentation & Testing (Swagger + curl)
+
+### Swagger / OpenAPI
+- Provides interactive API docs for testing endpoints.
+- Useful for verifying:
+  - Event endpoints
+  - Explanation endpoints
+  - Admin refresh endpoint
+
+### curl
+- Used for quick testing and for cron-style triggers.
+- Example pattern (token removed here):
+  - `curl -X POST <backend>/api/admin/refresh -H "X-Admin-Token: <token>"`
+
+---
+
+## Deployment Tech Stack (Free-tier)
+
+### Frontend: Vercel
+- Static frontend build + CDN delivery
+- Environment-based configuration for API base URL
+- Automatic HTTPS
+
+### Backend: Render (Docker)
+- Docker-based build and deploy
+- Runs the Spring Boot application in a container
+- Uses environment variables to inject secrets and production config
+- Supports a separate Render Cron job for scheduled refresh
+
+### Database: Neon (PostgreSQL)
+- Cloud PostgreSQL database
+- SSL connection from Render backend
+- Flyway-managed schema
+
+---
+
+## Dockerfile (Build & Runtime)
+
+The backend is deployed via a Dockerfile which:
+- Builds the Spring Boot jar in a build stage (Maven + JDK)
+- Runs the jar in a runtime stage (JRE)
+- Produces a repeatable, “runs the same everywhere” deployment artifact
+
+Benefits:
+- No manual server setup
+- Consistent builds across environments
+- Production-like deployment even on free hosting
+
+---
+
+## What makes this project impressive
+
+This project demonstrates more than just “a working app”. It demonstrates production thinking:
+
+- End-to-end system design (FO / BO / DB separation)
+- External signal ingestion and correlation for explanations
+- Version-controlled database schema with Flyway migrations
+- Secure admin operations with token-based protection
+- Robust scheduling strategy using cloud cron + feature flags
+- Optional OpenAI integration with safe fallback behavior
+- Production-safe secret handling (no keys in Git)
+- Real cloud deployment on a free-tier stack (Vercel + Render + Neon)
+- API-first development with Swagger and curl testing
+
+---
+
+## Links
+
+- Live site: https://btc-explainer.vercel.app/
+- GitHub repository: https://github.com/sachininirmani/BTC-explainer
+
+---
+
+## Conclusion
+
+BTC Explainer is a complete, deployed, production-style system that turns raw BTC price movements into readable explanations backed by stored signals and a repeatable daily pipeline.  
+It highlights practical skills in full-stack engineering, cloud deployment, data pipelines, database migrations, secure admin operations, and optional AI augmentation.
